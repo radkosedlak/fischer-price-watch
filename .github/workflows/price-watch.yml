@@ -1,0 +1,43 @@
+name: Fischer price watch
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"   # kazdych 20 minut (GitHub moze bezat s miernym oneskorenim)
+  workflow_dispatch: {}       # moznost spustit rucne cez tlacidlo "Run workflow"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: price-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Check price
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python check_price.py
+
+      - name: Commit price log
+        run: |
+          git config user.name "price-bot"
+          git config user.email "price-bot@users.noreply.github.com"
+          git add price.json
+          git diff --cached --quiet || git commit -m "Update price log"
+          git push
+
