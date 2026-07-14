@@ -2,7 +2,7 @@ name: Fischer price watch
 
 on:
   schedule:
-    - cron: "*/20 * * * *"   # kazdych 20 minut (GitHub moze bezat s miernym oneskorenim)
+    - cron: "7,27,47 * * * *"   # 3x za hodinu, mimo pretazenych okruhlych minut
   workflow_dispatch: {}       # moznost spustit rucne cez tlacidlo "Run workflow"
 
 permissions:
